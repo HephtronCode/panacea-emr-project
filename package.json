@@ -1,0 +1,19 @@
+{
+  "name": "Panacea-Project",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "install-all": "cd panacea-backend && pnpm install && cd ../panacea-frontend && pnpm install",
+    "backend": "cd panacea-backend && pnpm dev",
+    "frontend": "cd panacea-frontend && pnpm dev",
+    "dev": "concurrently -n \"API,UI\" -c \"magenta,cyan\" \"pnpm run backend\" \"pnpm run frontend\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.17.1",
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}
