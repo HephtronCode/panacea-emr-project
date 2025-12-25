@@ -1,27 +1,39 @@
 import React from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "@/components/theme-provider";
-import { AuthProvider } from "@/context/AuthContext"; // <-- Import this
-import LoginPage from "@/pages/LoginPage";
+import { AuthProvider } from "@/context/AuthContext";
 
-// We'll build Dashboard next, but let's placeholder it so we can test redirection
-const DashboardPlaceholder = () => (
-	<h1 className="text-3xl p-10">Welcome Doctor</h1>
-);
+// Pages and Layouts
+import LoginPage from "@/pages/LoginPage";
+import DashboardLayout from "@/layouts/DashboardLayout";
+import DashboardOverview from "@/pages/DashboardOverview";
+import PatientsPage from "@/pages/PatientsPage"; // <-- The New Component
 
 function App() {
 	return (
-		<ThemeProvider defaultTheme="system" storageKey="panacea-theme">
-			{/* AuthProvider MUST be inside ThemeProvider but outside Routes */}
+		<ThemeProvider defaultTheme="dark" storageKey="panacea-theme">
 			<AuthProvider>
 				<BrowserRouter>
 					<Routes>
+						{/* --- Public Route --- */}
 						<Route path="/login" element={<LoginPage />} />
 
-						{/* Temporary route for testing */}
-						<Route path="/dashboard" element={<DashboardPlaceholder />} />
+						{/* --- Protected Dashboard Routes --- */}
+						{/* The Layout acts as the Shell (Sidebar + Header) */}
+						<Route path="/dashboard" element={<DashboardLayout />}>
+							{/* 1. Dashboard Overview (http://localhost:5173/dashboard) */}
+							<Route index element={<DashboardOverview />} />
 
-						<Route path="/" element={<Navigate to="/login" replace />} />
+							{/* 2. Patient Registry (http://localhost:5173/dashboard/patients) */}
+							<Route path="patients" element={<PatientsPage />} />
+						</Route>
+
+						{/* --- Global Redirects --- */}
+						{/* If user goes to root /, send them to dashboard (or login via protection logic) */}
+						<Route path="/" element={<Navigate to="/dashboard" replace />} />
+
+						{/* Catch-all for unknown routes */}
+						<Route path="*" element={<Navigate to="/dashboard" replace />} />
 					</Routes>
 				</BrowserRouter>
 			</AuthProvider>
