@@ -8,7 +8,8 @@ import LoginPage from "@/pages/LoginPage";
 import DashboardLayout from "@/layouts/DashboardLayout";
 import DashboardOverview from "@/pages/DashboardOverview";
 import PatientsPage from "@/pages/PatientsPage";
-import AppointmentsPage from "@/pages/AppointmentsPage"; // <-- New Import
+import AppointmentsPage from "@/pages/AppointmentsPage";
+import MedicalRecordsPage from "@/pages/MedicalRecordsPage"; // <-- New Import
 
 function App() {
 	return (
@@ -30,6 +31,9 @@ function App() {
 
 							{/* 3. Appointment Scheduler (http://localhost:5173/dashboard/appointments) */}
 							<Route path="appointments" element={<AppointmentsPage />} />
+
+							{/* 4. Clinical Records (http://localhost:5173/dashboard/records) */}
+							<Route path="records" element={<MedicalRecordsPage />} />
 						</Route>
 
 						{/* --- Global Redirects --- */}
