@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom"; // <-- Added Import
 import { fetchPatients, createPatient } from "@/api/patients";
 import { motion } from "framer-motion";
 import { Plus, Search, User } from "lucide-react";
@@ -27,9 +28,11 @@ import { Label } from "@/components/ui/label";
 
 const PatientsPage = () => {
 	const queryClient = useQueryClient();
+	const navigate = useNavigate(); // <-- Initialize Navigation
 	const [searchTerm, setSearchTerm] = useState("");
 	const [isOpen, setIsOpen] = useState(false);
 
+	// New Patient Form State
 	const [formData, setFormData] = useState({
 		name: "",
 		phone: "",
@@ -38,6 +41,7 @@ const PatientsPage = () => {
 		address: "",
 	});
 
+	// 1. FETCH PATIENTS
 	const {
 		data: patients,
 		isLoading,
@@ -47,6 +51,7 @@ const PatientsPage = () => {
 		queryFn: fetchPatients,
 	});
 
+	// 2. CREATE MUTATION
 	const mutation = useMutation({
 		mutationFn: createPatient,
 		onSuccess: () => {
@@ -68,6 +73,7 @@ const PatientsPage = () => {
 		},
 	});
 
+	// Filter Logic
 	const filteredPatients = patients?.filter(
 		(p) =>
 			p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -95,7 +101,6 @@ const PatientsPage = () => {
 			{/* HEADER SECTION */}
 			<div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border pb-6">
 				<div>
-					{/* Switched text-white to text-foreground (Smart Color) */}
 					<h1 className="text-3xl font-bold tracking-tight text-foreground">
 						Patient Registry
 					</h1>
@@ -109,7 +114,6 @@ const PatientsPage = () => {
 						<Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
 						<Input
 							placeholder="Search records..."
-							/* Background adapts to theme, border adapts to theme */
 							className="pl-10 w-64 bg-background border-border focus:border-primary/50"
 							value={searchTerm}
 							onChange={(e) => setSearchTerm(e.target.value)}
@@ -122,8 +126,6 @@ const PatientsPage = () => {
 								<Plus className="mr-2 h-4 w-4" /> Add Patient
 							</Button>
 						</DialogTrigger>
-
-						{/* Fixed Modal Backgrounds for Light Mode */}
 						<DialogContent className="sm:max-w-[425px] bg-background border-border text-foreground shadow-2xl">
 							<DialogHeader>
 								<DialogTitle>Admit New Patient</DialogTitle>
@@ -170,7 +172,7 @@ const PatientsPage = () => {
 									<Label>Gender</Label>
 									<select
 										name="gender"
-										className="flex h-10 w-full rounded-md border border-input bg-muted/50 px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+										className="flex h-10 w-full rounded-md border border-input bg-muted/50 px-3 py-2 text-sm text-foreground focus:ring-2 focus:ring-primary focus:outline-none"
 										value={formData.gender}
 										onChange={handleInputChange}
 									>
@@ -200,7 +202,6 @@ const PatientsPage = () => {
 			</div>
 
 			{/* TABLE SECTION */}
-			{/* Changed bg-slate-900 to bg-card, border-white/10 to border-border */}
 			<div className="rounded-xl border border-border bg-card/50 backdrop-blur-md overflow-hidden shadow-sm">
 				<Table>
 					<TableHeader className="bg-muted/50">
@@ -224,6 +225,7 @@ const PatientsPage = () => {
 					</TableHeader>
 					<TableBody>
 						{isLoading ? (
+							// LOADING SKELETON
 							[...Array(5)].map((_, i) => (
 								<TableRow key={i} className="border-border">
 									<TableCell>
@@ -256,17 +258,17 @@ const PatientsPage = () => {
 								</TableCell>
 							</TableRow>
 						) : (
+							// REAL DATA
 							filteredPatients?.map((patient) => (
 								<motion.tr
 									initial={{ opacity: 0, y: 5 }}
 									animate={{ opacity: 1, y: 0 }}
 									key={patient._id}
-									// Hover effect now uses sematic 'muted' color
-									className="border-b border-border hover:bg-muted/50 transition-colors cursor-pointer group"
+									// Using Semantic Colors
+									className="border-b border-border hover:bg-muted/50 transition-colors group"
 								>
 									<TableCell className="font-medium text-foreground">
 										<div className="flex items-center gap-3">
-											{/* Icon Background */}
 											<div className="h-9 w-9 rounded-full bg-muted border border-border flex items-center justify-center text-xs font-bold text-muted-foreground group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
 												{patient.name.charAt(0)}
 											</div>
@@ -282,8 +284,8 @@ const PatientsPage = () => {
 										<span
 											className={`px-2 py-1 rounded-full text-xs border ${
 												patient.gender === "Male"
-													? "bg-blue-500/10 text-blue-600 border-blue-200 dark:border-blue-500/20"
-													: "bg-rose-500/10 text-rose-600 border-rose-200 dark:border-rose-500/20"
+													? "bg-blue-500/10 text-blue-600 border-blue-200 dark:border-blue-500/20 dark:text-blue-400"
+													: "bg-rose-500/10 text-rose-600 border-rose-200 dark:border-rose-500/20 dark:text-rose-400"
 											}`}
 										>
 											{patient.gender}
@@ -295,10 +297,15 @@ const PatientsPage = () => {
 										yrs
 									</TableCell>
 									<TableCell className="text-right">
+										{/* ACTION BUTTON - Wires up Navigation */}
 										<Button
 											variant="ghost"
 											size="sm"
 											className="text-muted-foreground hover:text-foreground"
+											onClick={(e) => {
+												e.stopPropagation(); // Stops any other row clicks
+												navigate(`/dashboard/patients/${patient._id}`);
+											}}
 										>
 											View File
 										</Button>

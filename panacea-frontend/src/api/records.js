@@ -10,3 +10,8 @@ export const createRecord = async (recordData) => {
 
 	return data.data;
 };
+
+export const fetchPatientRecords = async (patientId) => {
+	const { data } = await api.get(`/records/${patientId}`);
+	return data.data;
+};

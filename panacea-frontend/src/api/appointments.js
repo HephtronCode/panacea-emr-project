@@ -10,3 +10,9 @@ export const createAppointment = async (appointmentData) => {
 	const { data } = await api.post("/appointments", appointmentData);
 	return data.data;
 };
+
+export const fetchPatientAppointments = async (patientId) => {
+	const { data } = await api.get(`/appointments?patientId=${patientId}`);
+
+	return data.data;
+};

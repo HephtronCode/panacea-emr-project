@@ -9,7 +9,8 @@ import DashboardLayout from "@/layouts/DashboardLayout";
 import DashboardOverview from "@/pages/DashboardOverview";
 import PatientsPage from "@/pages/PatientsPage";
 import AppointmentsPage from "@/pages/AppointmentsPage";
-import MedicalRecordsPage from "@/pages/MedicalRecordsPage"; // <-- New Import
+import MedicalRecordsPage from "@/pages/MedicalRecordsPage";
+import PatientProfilePage from "@/pages/PatientProfilePage"; // <-- New Import
 
 function App() {
 	return (
@@ -29,10 +30,14 @@ function App() {
 							{/* 2. Patient Registry (http://localhost:5173/dashboard/patients) */}
 							<Route path="patients" element={<PatientsPage />} />
 
-							{/* 3. Appointment Scheduler (http://localhost:5173/dashboard/appointments) */}
+							{/* 3. Patient Profile / Dossier (http://localhost:5173/dashboard/patients/123) */}
+							{/* This :id matches the useParams() we used in PatientProfilePage */}
+							<Route path="patients/:id" element={<PatientProfilePage />} />
+
+							{/* 4. Appointment Scheduler (http://localhost:5173/dashboard/appointments) */}
 							<Route path="appointments" element={<AppointmentsPage />} />
 
-							{/* 4. Clinical Records (http://localhost:5173/dashboard/records) */}
+							{/* 5. Clinical Records (http://localhost:5173/dashboard/records) */}
 							<Route path="records" element={<MedicalRecordsPage />} />
 						</Route>
 
