@@ -7,7 +7,8 @@ import { AuthProvider } from "@/context/AuthContext";
 import LoginPage from "@/pages/LoginPage";
 import DashboardLayout from "@/layouts/DashboardLayout";
 import DashboardOverview from "@/pages/DashboardOverview";
-import PatientsPage from "@/pages/PatientsPage"; // <-- The New Component
+import PatientsPage from "@/pages/PatientsPage";
+import AppointmentsPage from "@/pages/AppointmentsPage"; // <-- New Import
 
 function App() {
 	return (
@@ -19,20 +20,23 @@ function App() {
 						<Route path="/login" element={<LoginPage />} />
 
 						{/* --- Protected Dashboard Routes --- */}
-						{/* The Layout acts as the Shell (Sidebar + Header) */}
+						{/* The Layout contains the Sidebar & Header */}
 						<Route path="/dashboard" element={<DashboardLayout />}>
 							{/* 1. Dashboard Overview (http://localhost:5173/dashboard) */}
 							<Route index element={<DashboardOverview />} />
 
 							{/* 2. Patient Registry (http://localhost:5173/dashboard/patients) */}
 							<Route path="patients" element={<PatientsPage />} />
+
+							{/* 3. Appointment Scheduler (http://localhost:5173/dashboard/appointments) */}
+							<Route path="appointments" element={<AppointmentsPage />} />
 						</Route>
 
 						{/* --- Global Redirects --- */}
-						{/* If user goes to root /, send them to dashboard (or login via protection logic) */}
+						{/* Redirect root to dashboard */}
 						<Route path="/" element={<Navigate to="/dashboard" replace />} />
 
-						{/* Catch-all for unknown routes */}
+						{/* Catch-all for 404s - Send to dashboard */}
 						<Route path="*" element={<Navigate to="/dashboard" replace />} />
 					</Routes>
 				</BrowserRouter>
