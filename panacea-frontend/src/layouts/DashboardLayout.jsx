@@ -9,6 +9,7 @@ import {
 	Activity,
 	LogOut,
 	Stethoscope,
+	Bed, // <-- Added 'Bed' icon
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/components/theme-provider";
@@ -17,7 +18,7 @@ const DashboardLayout = () => {
 	const { user, logout } = useAuth();
 	const { theme, setTheme } = useTheme();
 	const navigate = useNavigate();
-	const location = useLocation(); // Hook to read the current URL
+	const location = useLocation();
 
 	const handleLogout = () => {
 		logout();
@@ -28,17 +29,24 @@ const DashboardLayout = () => {
 	const getPageTitle = () => {
 		const path = location.pathname;
 		if (path === "/dashboard") return "Overview";
+
 		if (path.includes("/dashboard/patients")) {
-			// If path has more than 3 parts (e.g. /dashboard/patients/123), it's a Profile
 			return path.split("/").length > 3
 				? "Patient Profile"
 				: "Patient Registry";
 		}
+
 		if (path.includes("/dashboard/appointments")) return "Schedule";
+
 		if (path.includes("/dashboard/records")) return "Medical Records";
+
+		// Added Header Title for Wards
+		if (path.includes("/dashboard/wards")) return "Unit Management";
+
 		return "System";
 	};
 
+	// Updated Navigation Array
 	const navItems = [
 		{
 			label: "Overview",
@@ -59,6 +67,12 @@ const DashboardLayout = () => {
 			label: "Medical Records",
 			path: "/dashboard/records",
 			icon: <Activity size={18} />,
+		},
+		// New Item Added Here
+		{
+			label: "Unit Management",
+			path: "/dashboard/wards",
+			icon: <Bed size={18} />,
 		},
 	];
 
@@ -163,7 +177,7 @@ const DashboardLayout = () => {
 				<div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary/50 to-transparent opacity-50 z-20"></div>
 
 				{/* Dynamic Header */}
-				<header className="h-20 flex items-center justify-between px-8 bg-background/20 backdrop-blur-md z-10 sticky top-0 border-b border-white/5">
+				<header className="h-20 flex items-center justify-between px-8 bg-background/20 backdrop-blur-md z-10 sticky top-0 border-b border-border">
 					<h2 className="text-2xl font-light text-muted-foreground">
 						Dashboard /{" "}
 						<span className="font-bold text-foreground">{getPageTitle()}</span>

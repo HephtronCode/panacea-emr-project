@@ -8,9 +8,10 @@ import LoginPage from "@/pages/LoginPage";
 import DashboardLayout from "@/layouts/DashboardLayout";
 import DashboardOverview from "@/pages/DashboardOverview";
 import PatientsPage from "@/pages/PatientsPage";
+import PatientProfilePage from "@/pages/PatientProfilePage";
 import AppointmentsPage from "@/pages/AppointmentsPage";
 import MedicalRecordsPage from "@/pages/MedicalRecordsPage";
-import PatientProfilePage from "@/pages/PatientProfilePage"; // <-- New Import
+import WardsPage from "@/pages/WardsPage"; // <-- New Import
 
 function App() {
 	return (
@@ -24,28 +25,25 @@ function App() {
 						{/* --- Protected Dashboard Routes --- */}
 						{/* The Layout contains the Sidebar & Header */}
 						<Route path="/dashboard" element={<DashboardLayout />}>
-							{/* 1. Dashboard Overview (http://localhost:5173/dashboard) */}
+							{/* 1. Dashboard Overview */}
 							<Route index element={<DashboardOverview />} />
 
-							{/* 2. Patient Registry (http://localhost:5173/dashboard/patients) */}
+							{/* 2. Patient Registry & Profile */}
 							<Route path="patients" element={<PatientsPage />} />
-
-							{/* 3. Patient Profile / Dossier (http://localhost:5173/dashboard/patients/123) */}
-							{/* This :id matches the useParams() we used in PatientProfilePage */}
 							<Route path="patients/:id" element={<PatientProfilePage />} />
 
-							{/* 4. Appointment Scheduler (http://localhost:5173/dashboard/appointments) */}
+							{/* 3. Appointment Scheduler */}
 							<Route path="appointments" element={<AppointmentsPage />} />
 
-							{/* 5. Clinical Records (http://localhost:5173/dashboard/records) */}
+							{/* 4. Clinical Records */}
 							<Route path="records" element={<MedicalRecordsPage />} />
+
+							{/* 5. Ward / Unit Management (NEW) */}
+							<Route path="wards" element={<WardsPage />} />
 						</Route>
 
 						{/* --- Global Redirects --- */}
-						{/* Redirect root to dashboard */}
 						<Route path="/" element={<Navigate to="/dashboard" replace />} />
-
-						{/* Catch-all for 404s - Send to dashboard */}
 						<Route path="*" element={<Navigate to="/dashboard" replace />} />
 					</Routes>
 				</BrowserRouter>
