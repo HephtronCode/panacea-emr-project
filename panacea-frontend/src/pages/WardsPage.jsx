@@ -7,15 +7,8 @@ import {
 	dischargeFromBed,
 } from "@/api/wards";
 import { fetchPatients } from "@/api/patients";
-import { motion, AnimatePresence } from "framer-motion";
-import {
-	Bed,
-	User,
-	Activity,
-	AlertCircle,
-	PlusCircle,
-	LogOut,
-} from "lucide-react";
+import { motion } from "framer-motion";
+import { Bed, User, Activity, AlertCircle } from "lucide-react";
 import { useTheme } from "@/components/theme-provider";
 
 import { Button } from "@/components/ui/button";
@@ -36,9 +29,8 @@ const WardsPage = () => {
 	const queryClient = useQueryClient();
 	const { theme } = useTheme();
 
-	// State for Admission Modal
-	const [selectedBed, setSelectedBed] = useState(null); // { wardId, bedId, number, isOccupied, currentPatient }
-	const [admissionId, setAdmissionId] = useState(""); // Patient ID selected to admit
+	const [selectedBed, setSelectedBed] = useState(null);
+	const [admissionId, setAdmissionId] = useState("");
 	const [isModalOpen, setIsModalOpen] = useState(false);
 
 	// 1. DATA FETCHING
@@ -47,11 +39,10 @@ const WardsPage = () => {
 		queryFn: fetchWards,
 	});
 
-	// Need patients list for the dropdown
 	const { data: patients } = useQuery({
 		queryKey: ["patients"],
 		queryFn: fetchPatients,
-		enabled: isModalOpen, // Optimization: Only fetch when modal opens
+		enabled: isModalOpen,
 	});
 
 	// 2. MUTATIONS
@@ -86,13 +77,11 @@ const WardsPage = () => {
 
 	const confirmAction = () => {
 		if (selectedBed.isOccupied) {
-			// Action: Discharge
 			dischargeMutation.mutate({
 				wardId: selectedBed.wardId,
 				bedId: selectedBed._id,
 			});
 		} else {
-			// Action: Admit
 			if (!admissionId) return alert("Please select a patient");
 			admitMutation.mutate({
 				wardId: selectedBed.wardId,
@@ -122,11 +111,13 @@ const WardsPage = () => {
 				</p>
 			</div>
 
-			{/* EMPTY STATE - SEED BUTTON */}
+			{/* EMPTY STATE */}
 			{wards?.length === 0 ? (
 				<div className="h-96 flex flex-col items-center justify-center border-2 border-dashed border-border rounded-xl bg-muted/20">
 					<Activity className="h-16 w-16 text-muted-foreground mb-4 opacity-50" />
-					<h2 className="text-xl font-semibold mb-2">Unit Offline</h2>
+					<h2 className="text-xl font-semibold mb-2 text-foreground">
+						Unit Offline
+					</h2>
 					<p className="text-muted-foreground mb-6">
 						Ward configuration not found in database.
 					</p>
@@ -157,7 +148,6 @@ const WardsPage = () => {
 							))}
 						</TabsList>
 
-						{/* Occupancy Stats Helper */}
 						<div className="flex gap-4 text-xs font-medium text-muted-foreground hidden md:flex">
 							<div className="flex items-center">
 								<div className="w-3 h-3 rounded-full bg-emerald-500/20 border border-emerald-500 mr-2"></div>{" "}
@@ -178,7 +168,7 @@ const WardsPage = () => {
 									<p className="text-xs text-muted-foreground uppercase">
 										Capacity
 									</p>
-									<p className="text-2xl font-bold">
+									<p className="text-2xl font-bold text-foreground">
 										{ward.capacity}{" "}
 										<span className="text-sm font-normal text-muted-foreground">
 											Beds
@@ -189,8 +179,9 @@ const WardsPage = () => {
 									<p className="text-xs text-muted-foreground uppercase">
 										Available
 									</p>
+									{/* SAFE MATH: Fallback to 0 */}
 									<p className="text-2xl font-bold text-emerald-500">
-										{ward.capacity - ward.occupied}
+										{ward.capacity - (ward.occupied || 0)}
 									</p>
 								</div>
 								<div className="p-4 rounded-lg bg-card border border-border">
@@ -198,7 +189,11 @@ const WardsPage = () => {
 										Occupancy
 									</p>
 									<p className="text-2xl font-bold text-blue-500">
-										{Math.round((ward.occupied / ward.capacity) * 100)}%
+										{/* SAFE MATH: Fallback to 0 */}
+										{ward.capacity > 0
+											? Math.round(((ward.occupied || 0) / ward.capacity) * 100)
+											: 0}
+										%
 									</p>
 								</div>
 							</div>
@@ -220,12 +215,14 @@ const WardsPage = () => {
 																			}
                                  `}
 									>
-										{/* Header Badge */}
-										<div className="absolute top-3 left-3 text-xs font-bold font-mono opacity-70">
+										<div
+											className={`absolute top-3 left-3 text-xs font-bold font-mono opacity-70 ${
+												bed.isOccupied ? "text-rose-500" : "text-emerald-500"
+											}`}
+										>
 											{bed.number}
 										</div>
 
-										{/* Central Icon */}
 										<div
 											className={`p-3 rounded-full mb-3 ${
 												bed.isOccupied
@@ -240,7 +237,6 @@ const WardsPage = () => {
 											)}
 										</div>
 
-										{/* Info */}
 										<div className="text-center">
 											<p
 												className={`font-semibold text-sm ${
@@ -250,9 +246,8 @@ const WardsPage = () => {
 												{bed.isOccupied ? "Occupied" : "Available"}
 											</p>
 											{bed.isOccupied && bed.patient && (
-												<p className="text-xs text-foreground mt-1 px-2 py-0.5 rounded-md bg-background/50 backdrop-blur">
-													{bed.patient.name.split(" ")[0]}{" "}
-													{/* First name only for compactness */}
+												<p className="text-xs text-foreground mt-1 px-2 py-0.5 rounded-md bg-background/50 backdrop-blur truncate max-w-[100px]">
+													{bed.patient.name.split(" ")[0]}
 												</p>
 											)}
 										</div>
@@ -266,26 +261,25 @@ const WardsPage = () => {
 
 			{/* ACTION DIALOG */}
 			<Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-				<DialogContent>
+				<DialogContent className="bg-background border-border text-foreground">
 					<DialogHeader>
 						<DialogTitle>
 							{selectedBed?.isOccupied ? "Discharge Patient" : "Admit Patient"}
 						</DialogTitle>
-						<DialogDescription>
+						<DialogDescription className="text-muted-foreground">
 							Bed {selectedBed?.number} is currently{" "}
 							{selectedBed?.isOccupied ? "occupied" : "available"}.
 						</DialogDescription>
 					</DialogHeader>
 
 					{selectedBed?.isOccupied ? (
-						// DISCHARGE MODE
-						<div className="bg-rose-500/10 border border-rose-500/20 rounded-md p-4 flex items-center gap-4 my-4">
-							<AlertCircle className="h-8 w-8 text-rose-500" />
+						<div className="bg-destructive/10 border border-destructive/20 rounded-md p-4 flex items-center gap-4 my-4">
+							<AlertCircle className="h-8 w-8 text-destructive" />
 							<div>
-								<p className="font-semibold text-rose-700 dark:text-rose-400">
+								<p className="font-semibold text-destructive">
 									Confirm Discharge
 								</p>
-								<p className="text-sm text-rose-600/80 dark:text-rose-400/80">
+								<p className="text-sm text-destructive/80">
 									This will remove{" "}
 									<strong>{selectedBed?.patient?.name || "Patient"}</strong>{" "}
 									from the active ward census.
@@ -293,11 +287,10 @@ const WardsPage = () => {
 							</div>
 						</div>
 					) : (
-						// ADMISSION MODE
 						<div className="my-4 space-y-3">
 							<Label>Select Patient for Admission</Label>
 							<select
-								className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:ring-2 focus:ring-ring"
+								className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground ring-offset-background focus:ring-2 focus:ring-ring"
 								onChange={(e) => setAdmissionId(e.target.value)}
 								value={admissionId}
 							>
