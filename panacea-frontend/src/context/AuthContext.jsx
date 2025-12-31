@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect, useContext } from "react";
+import React, { createContext, useState, useContext } from "react";
 import api from "@/api/axios";
 
 const AuthContext = createContext();
@@ -6,8 +6,13 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
 	// 1. Initialize State (Try to read user from SessionStorage on load)
 	const [user, setUser] = useState(() => {
-		const savedUser = sessionStorage.getItem("user");
-		return savedUser ? JSON.parse(savedUser) : null;
+		try {
+			const savedUser = sessionStorage.getItem("user");
+			return savedUser ? JSON.parse(savedUser) : null;
+		} catch (e) {
+			console.error("Error parsing user from session:", e);
+			return null;
+		}
 	});
 
 	// Derived state - if user exists, they are authenticated
@@ -18,20 +23,26 @@ export const AuthProvider = ({ children }) => {
 		try {
 			const response = await api.post("/auth/login", { email, password });
 
-			// Expected response: { token, data: { ...user } }
-			const { token, data } = response.data;
+			// STRUCTURAL ADAPTATION:
+			// Backend now returns standardized: { success: true, message: "...", data: { token, user } }
+			// Axios gives us the body at response.data
+			// So the actual payload is at response.data.data
+
+			const payload = response.data.data;
+
+			const { token, user: userData } = payload;
 
 			// Save to Session Storage
 			sessionStorage.setItem("token", token);
-			sessionStorage.setItem("user", JSON.stringify(data));
+			sessionStorage.setItem("user", JSON.stringify(userData));
 
 			// Update State
-			setUser(data);
+			setUser(userData);
 			return { success: true };
 		} catch (error) {
-			// Return error message to the component
-			const message = error.response?.data?.message || "Login failed";
-			return { success: false, error: message };
+			// Our improved axios interceptor (in api/axios.js) ensures 'error.message'
+			// is already the clean text message from the backend.
+			return { success: false, error: error.message };
 		}
 	};
 
@@ -40,7 +51,6 @@ export const AuthProvider = ({ children }) => {
 		sessionStorage.removeItem("token");
 		sessionStorage.removeItem("user");
 		setUser(null);
-		// Optional: window.location.href = '/login';
 	};
 
 	return (
@@ -52,5 +62,9 @@ export const AuthProvider = ({ children }) => {
 
 // Custom Hook to use the Context easily
 export const useAuth = () => {
-	return useContext(AuthContext);
+	const context = useContext(AuthContext);
+	if (context === undefined) {
+		throw new Error("useAuth must be used within an AuthProvider");
+	}
+	return context;
 };
