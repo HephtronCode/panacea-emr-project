@@ -495,7 +495,7 @@ E2E Tests (Playwright/Cypress)
 ```bash
 NODE_ENV=production
 PORT=5000
-MONGODB_URI=mongodb+srv://...
+MONGO_URI=mongodb+srv://...
 JWT_SECRET=strong_random_secret
 JWT_EXPIRE=30d
 ```
@@ -567,6 +567,10 @@ GET /api/patients 200 45.123 ms - 1234
 - Log aggregation (Logtail, Datadog)
 - Error tracking (Sentry)
 
+**Local Log Files:**
+
+- API writes to `panacea-backend/logs/all.log` and `panacea-backend/logs/error.log`. Verbosity is `debug` in development and `warn` otherwise.
+
 ### Frontend Monitoring
 
 **Recommendations:**
@@ -584,6 +588,43 @@ GET /api/patients 200 45.123 ms - 1234
 
 **Problem:** Frontend can't reach backend  
 **Solution:** Add frontend URL to `allowedOrigins` in [app.js](panacea-backend/src/app.js)
+
+---
+
+## Local Development Workflow
+
+Run both servers concurrently from the repository root using provided scripts:
+
+```bash
+# Install backend and frontend dependencies
+pnpm run install-all
+
+# Start API (port 5000) and UI (port 5173) together
+pnpm run dev
+
+# Or run individually
+pnpm run backend   # API only
+pnpm run frontend  # UI only
+```
+
+Environment variables:
+
+```env
+# panacea-backend/.env
+PORT=5000
+NODE_ENV=development
+MONGO_URI=mongodb://localhost:27017/panacea
+JWT_SECRET=your_secret_key_here
+JWT_EXPIRE=30d
+
+# panacea-frontend/.env
+VITE_API_URL=http://localhost:5000/api
+```
+
+Access URLs:
+
+- UI: http://localhost:5173
+- API Base: http://localhost:5000/api
 
 ### JWT Expiration
 

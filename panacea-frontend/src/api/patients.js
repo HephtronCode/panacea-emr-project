@@ -19,3 +19,8 @@ export const updatePatientProfile = async ({ id, data: updates }) => {
 	const { data } = await api.put(`/patients/${id}`, updates);
 	return data.data;
 };
+
+export const deletePatient = async (id) => {
+	const { data } = await api.delete(`/patients/${id}`);
+	return data;
+};

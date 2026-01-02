@@ -1,9 +1,12 @@
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useNavigate } from "react-router-dom"; // <-- Added Import
-import { fetchPatients, createPatient } from "@/api/patients";
+import { useNavigate } from "react-router-dom";
+import { fetchPatients, createPatient, deletePatient } from "@/api/patients";
 import { motion } from "framer-motion";
-import { Plus, Search, User } from "lucide-react";
+import { Plus, Search, User, Trash2 } from "lucide-react";
+import { toast } from "sonner"; // <-- The Toast Trigger
+
+// UI Components
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -24,15 +27,28 @@ import {
 	DialogTitle,
 	DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+	AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Label } from "@/components/ui/label";
 
 const PatientsPage = () => {
 	const queryClient = useQueryClient();
-	const navigate = useNavigate(); // <-- Initialize Navigation
+	const navigate = useNavigate();
 	const [searchTerm, setSearchTerm] = useState("");
-	const [isOpen, setIsOpen] = useState(false);
 
-	// New Patient Form State
+	// UI State
+	const [isOpen, setIsOpen] = useState(false);
+	const [deleteId, setDeleteId] = useState(null);
+
 	const [formData, setFormData] = useState({
 		name: "",
 		phone: "",
@@ -41,7 +57,7 @@ const PatientsPage = () => {
 		address: "",
 	});
 
-	// 1. FETCH PATIENTS
+	// 1. Fetch
 	const {
 		data: patients,
 		isLoading,
@@ -51,7 +67,7 @@ const PatientsPage = () => {
 		queryFn: fetchPatients,
 	});
 
-	// 2. CREATE MUTATION
+	// 2. Create with Feedback
 	const mutation = useMutation({
 		mutationFn: createPatient,
 		onSuccess: () => {
@@ -64,16 +80,35 @@ const PatientsPage = () => {
 				gender: "Male",
 				address: "",
 			});
+			// SUCCESS TOAST
+			toast.success("Patient Admitted", {
+				description: "New clinical file has been successfully created.",
+			});
 		},
 		onError: (error) => {
-			alert(
-				"Failed to add patient: " +
-					(error.response?.data?.message || "Unknown error")
-			);
+			// ERROR TOAST
+			toast.error("Admission Failed", {
+				description:
+					error.response?.data?.message || "Please check network connection.",
+			});
 		},
 	});
 
-	// Filter Logic
+	// 3. Delete with Feedback
+	const deleteMutation = useMutation({
+		mutationFn: deletePatient,
+		onSuccess: () => {
+			queryClient.invalidateQueries(["patients"]);
+			setDeleteId(null);
+			// INFO TOAST
+			toast.info("Record Archived", {
+				description: "Patient has been moved to secure archive storage.",
+			});
+		},
+		onError: (err) =>
+			toast.error("Action Denied", { description: err.message }),
+	});
+
 	const filteredPatients = patients?.filter(
 		(p) =>
 			p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -92,13 +127,13 @@ const PatientsPage = () => {
 	if (isError)
 		return (
 			<div className="p-8 text-destructive">
-				Error loading patients. Is the backend running?
+				Error loading registry. Backend might be offline.
 			</div>
 		);
 
 	return (
 		<div className="space-y-8 animate-in fade-in duration-500 h-full flex flex-col">
-			{/* HEADER SECTION */}
+			{/* Header & Controls */}
 			<div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border pb-6">
 				<div>
 					<h1 className="text-3xl font-bold tracking-tight text-foreground">
@@ -201,7 +236,7 @@ const PatientsPage = () => {
 				</div>
 			</div>
 
-			{/* TABLE SECTION */}
+			{/* Table Data */}
 			<div className="rounded-xl border border-border bg-card/50 backdrop-blur-md overflow-hidden shadow-sm">
 				<Table>
 					<TableHeader className="bg-muted/50">
@@ -225,7 +260,6 @@ const PatientsPage = () => {
 					</TableHeader>
 					<TableBody>
 						{isLoading ? (
-							// LOADING SKELETON
 							[...Array(5)].map((_, i) => (
 								<TableRow key={i} className="border-border">
 									<TableCell>
@@ -258,13 +292,11 @@ const PatientsPage = () => {
 								</TableCell>
 							</TableRow>
 						) : (
-							// REAL DATA
 							filteredPatients?.map((patient) => (
 								<motion.tr
 									initial={{ opacity: 0, y: 5 }}
 									animate={{ opacity: 1, y: 0 }}
 									key={patient._id}
-									// Using Semantic Colors
 									className="border-b border-border hover:bg-muted/50 transition-colors group"
 								>
 									<TableCell className="font-medium text-foreground">
@@ -297,18 +329,69 @@ const PatientsPage = () => {
 										yrs
 									</TableCell>
 									<TableCell className="text-right">
-										{/* ACTION BUTTON - Wires up Navigation */}
-										<Button
-											variant="ghost"
-											size="sm"
-											className="text-muted-foreground hover:text-foreground"
-											onClick={(e) => {
-												e.stopPropagation(); // Stops any other row clicks
-												navigate(`/dashboard/patients/${patient._id}`);
-											}}
-										>
-											View File
-										</Button>
+										<div className="flex items-center justify-end gap-2">
+											<Button
+												variant="ghost"
+												size="sm"
+												className="text-muted-foreground hover:text-foreground"
+												onClick={(e) => {
+													e.stopPropagation();
+													navigate(`/dashboard/patients/${patient._id}`);
+												}}
+											>
+												View File
+											</Button>
+
+											{/* DELETE CONFIRMATION */}
+											<AlertDialog
+												open={deleteId === patient._id}
+												onOpenChange={(isOpen) =>
+													setDeleteId(isOpen ? patient._id : null)
+												}
+											>
+												<AlertDialogTrigger asChild>
+													<Button
+														variant="ghost"
+														size="icon"
+														className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+														onClick={(e) => e.stopPropagation()}
+													>
+														<Trash2 className="h-4 w-4" />
+													</Button>
+												</AlertDialogTrigger>
+												<AlertDialogContent className="bg-background border-border text-foreground">
+													<AlertDialogHeader>
+														<AlertDialogTitle>Archive Record?</AlertDialogTitle>
+														<AlertDialogDescription className="text-muted-foreground">
+															This will archive <strong>{patient.name}</strong>.
+															The data is preserved for audit purposes but will
+															be hidden from this list.
+														</AlertDialogDescription>
+													</AlertDialogHeader>
+													<AlertDialogFooter>
+														<AlertDialogCancel
+															onClick={(e) => {
+																e.stopPropagation();
+																setDeleteId(null);
+															}}
+														>
+															Cancel
+														</AlertDialogCancel>
+														<AlertDialogAction
+															className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+															onClick={(e) => {
+																e.stopPropagation();
+																deleteMutation.mutate(patient._id);
+															}}
+														>
+															{deleteMutation.isPending
+																? "Archiving..."
+																: "Archive Record"}
+														</AlertDialogAction>
+													</AlertDialogFooter>
+												</AlertDialogContent>
+											</AlertDialog>
+										</div>
 									</TableCell>
 								</motion.tr>
 							))

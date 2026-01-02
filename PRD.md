@@ -847,6 +847,41 @@ GET /api/analytics/patients
 | ------- | ------------ | -------- | -------------------- |
 | 1.0     | Dec 29, 2025 | Dev Team | Initial PRD creation |
 
+### 13.4 Developer Workflow (Local)
+
+For quick local development, the root workspace provides scripts to install and run both apps concurrently:
+
+```bash
+# Install backend and frontend dependencies
+pnpm run install-all
+
+# Start API (port 5000) and UI (port 5173) together
+pnpm run dev
+
+# Alternatively, run individually
+pnpm run backend   # API only
+pnpm run frontend  # UI only
+```
+
+Environment configuration:
+
+```env
+# panacea-backend/.env
+PORT=5000
+NODE_ENV=development
+MONGO_URI=mongodb://localhost:27017/panacea
+JWT_SECRET=your_secret_key_here
+JWT_EXPIRE=30d
+
+# panacea-frontend/.env
+VITE_API_URL=http://localhost:5000/api
+```
+
+Access URLs:
+
+- UI: http://localhost:5173
+- API Base: http://localhost:5000/api
+
 ---
 
 **Document Owner:** Product Manager  

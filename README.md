@@ -10,26 +10,27 @@ A modern, full-stack hospital management platform built with React and Node.js f
 - MongoDB v6+
 - pnpm (recommended) or npm
 
-### Installation
+### Installation & Run
 
 ```bash
-# Install dependencies for all workspaces
-pnpm install
+# Option A: Install both apps from the root (Windows/macOS/Linux)
+pnpm run install-all
 
-# Configure environment variables
-cp panacea-backend/.env.example panacea-backend/.env
-# Edit .env with your MongoDB URI and JWT secrets
+# Option B: Install separately
+cd panacea-backend && pnpm install && cd ../panacea-frontend && pnpm install
 
-# Start backend (port 5000)
-cd panacea-backend
-pnpm dev
+# Configure backend environment (create or edit panacea-backend/.env)
+# Required keys shown below in the Environment Variables section
 
-# Start frontend (port 5173)
-cd panacea-frontend
-pnpm dev
+# Run both API and UI together (concurrently)
+pnpm run dev
+
+# Or run individually
+pnpm run backend   # starts API (port 5000)
+pnpm run frontend  # starts UI  (port 5173)
 ```
 
-**Access:** http://localhost:5173
+**Access:** http://localhost:5173 (UI) → calls http://localhost:5000/api (API)
 
 ## 📦 Tech Stack
 
@@ -122,7 +123,7 @@ GET    /analytics                # Dashboard metrics
 ```env
 PORT=5000
 NODE_ENV=development
-MONGODB_URI=mongodb://localhost:27017/panacea
+MONGO_URI=mongodb://localhost:27017/panacea
 JWT_SECRET=your_secret_key_here
 JWT_EXPIRE=30d
 ```
@@ -150,6 +151,15 @@ pnpm build
 # Preview production build
 pnpm preview
 ```
+
+## 🧰 Workspace Scripts
+
+- **install-all:** installs dependencies for backend and frontend
+- **backend:** runs the API (nodemon on port 5000)
+- **frontend:** runs the UI (Vite on port 5173)
+- **dev:** runs both API and UI concurrently (via `concurrently`)
+
+Logs for the API are written to `panacea-backend/logs/all.log` and `panacea-backend/logs/error.log`. Log verbosity is `debug` when `NODE_ENV=development`, otherwise `warn`.
 
 ## 📊 Database Models
 
@@ -182,7 +192,7 @@ Built with shadcn/ui:
 
 ## 📄 License
 
-MIT License - See LICENSE file for details
+MIT License
 
 ## 👥 Contributing
 
