@@ -54,7 +54,8 @@ panacea-backend/
     │   ├── Patient.js           # Patient demographics
     │   ├── Appointments.js      # Appointment scheduling
     │   ├── MedicalRecord.js     # Clinical documentation
-    │   └── Ward.js              # Bed/ward management
+    │   ├── Ward.js              # Bed/ward management
+    │   └── AuditLog.js          # System activity tracking
     ├── controllers/             # Request handlers
     │   ├── authController.js
     │   ├── patientController.js
@@ -69,9 +70,18 @@ panacea-backend/
     │   ├── recordRoutes.js
     │   ├── wardRoutes.js
     │   └── analyticsRoutes.js
+    ├── services/                # Business logic services
+    │   └── auditService.js      # Service for creating audit logs
+    ├── utils/                   # Shared utility functions
+    │   ├── apiResponse.js       # Standardized response helper
+    │   └── logger.js            # Winston logger config
+    ├── validators/              # Request validation schemas
+    │   └── authValidators.js    # Auth-specific validation logic
     └── middleware/
         ├── authMiddleware.js    # JWT verification + role checks
-        └── errorMiddleware.js   # Global error handler
+        ├── errorMiddleware.js   # Global error handler
+        ├── roleMiddleware.js    # Role-based restriction helper
+        └── validatorMiddleware.js # Middleware to run validators
 ```
 
 ### Data Models
@@ -152,6 +162,19 @@ Methods:
   notes: String,
   visitDate: Date,
   timestamps: { createdAt, updatedAt }
+}
+```
+
+#### AuditLog Schema
+
+```javascript
+{
+  user: ObjectId → User,   // Who performed the action
+  action: String,          // e.g., 'PATIENT_ADMISSION'
+  details: String,         // Human-readable description
+  resourceId: ObjectId,    // ID of the affected resource (optional)
+  ip: String,              // IP address of the requester
+  timestamps: { createdAt }
 }
 ```
 
