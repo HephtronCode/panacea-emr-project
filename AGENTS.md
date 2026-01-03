@@ -50,3 +50,17 @@ Code was not simply generated; it was _iteratively refined_.
 1.  **Draft:** AI proposes the `PatientController`.
 2.  **Audit:** Human notes missing "Soft Delete" requirements.
 3.  **Refactor:** AI generates the Schema Middleware implementation to handle soft deletes transparently.
+
+---
+
+## 4. Instructions for Future AI Agents
+
+When continuing development on Panacea, please adhere to these guidelines:
+
+- **Security First:** Always use the `protect` and `authorize` middlewares for sensitive routes. Never return sensitive fields like `password` in API responses (handled by `select: false` in schema).
+- **Standardized Responses:** Use the `apiResponse` utility for all controller responses to maintain a consistent frontend-friendly structure.
+- **Audit Logging:** Integrate `logAudit` into any new CUD (Create, Update, Delete) operations.
+- **Async Handling:** Use `express-async-handler` to avoid try-catch boilerplate in controllers.
+- **Validation:** Define new validators in `src/middleware/validatorMiddleware.js` using `express-validator`.
+- **Schema Design:** Use soft deletes (`isDeleted`, `deletedAt`) for critical data entities instead of hard deletes.
+- **Documentation:** Keep `TECHNICAL_DOCS.md` and `PRD.md` updated as you add new features or modify existing ones.

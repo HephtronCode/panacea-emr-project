@@ -34,6 +34,7 @@ pnpm run frontend  # starts UI  (port 5173)
 - UI: http://localhost:5173
 - API Base: http://localhost:5000/api
 - Health Check: http://localhost:5000/api/health
+- API Docs: http://localhost:5000/api-docs (Swagger)
 
 ## 📦 Tech Stack
 
@@ -107,12 +108,10 @@ Base URL: `http://localhost:5000/api`
 | | DELETE | `/patients/:id` | Remove patient |
 | **Appointments** | GET | `/appointments` | List appointments |
 | | POST | `/appointments` | Create appointment |
-| | PUT | `/appointments/:id` | Update appointment |
-| | DELETE | `/appointments/:id` | Cancel appointment |
-| **Records** | GET | `/records` | List medical records |
+| | PUT | `/appointments/:id` | Update status/date |
+| **Records** | GET | `/records/all` | List all records (Staff) |
 | | POST | `/records` | Create record |
-| | GET | `/records/patient/:id`| Patient records |
-| | PUT | `/records/:id` | Update record |
+| | GET | `/records/:patientId`| Patient history |
 | **Wards** | GET | `/wards` | Ward list with occupancy |
 | | POST | `/wards` | Create ward |
 | | PUT | `/wards/:id` | Update ward/beds |

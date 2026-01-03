@@ -88,23 +88,23 @@ panacea-backend/
 
 #### User Schema
 
-```javascript
+```text
 {
   name: String,
   email: String (unique, indexed),
-  password: String (hashed, not selected by default),
+  password: String (hashed, select: false),
   role: Enum ['patient', 'doctor', 'nurse', 'admin', 'receptionist'],
-  timestamps: { createdAt, updatedAt }
+  timestamps: true
 }
+```
 
 Methods:
-- generateAuthToken() → JWT
-- matchPassword(plaintext) → Boolean
-```
+- `generateAuthToken()` → Returns signed JWT
+- `matchPassword(plaintext)` → Compares bcrypt hashes
 
 #### Patient Schema
 
-```javascript
+```text
 {
   name: String,
   email: String (optional),
@@ -113,29 +113,31 @@ Methods:
   gender: Enum ['Male', 'Female', 'Other'],
   address: String,
   medicalHistory: [String],
-  registeredBy: ObjectId → User,
-  timestamps: { createdAt, updatedAt }
+  registeredBy: ObjectId -> User,
+  isDeleted: Boolean (default: false),
+  deletedAt: Date (default: null),
+  timestamps: true
 }
 ```
 
 #### Appointment Schema
 
-```javascript
+```text
 {
-  patient: ObjectId → Patient,
-  doctor: ObjectId → User,
+  patient: ObjectId -> Patient,
+  doctor: ObjectId -> User,
   date: Date,
   reason: String,
   status: Enum ['Pending', 'Completed', 'Cancelled', 'No-Show'],
   notes: String,
-  createdBy: ObjectId → User,
-  timestamps: { createdAt, updatedAt }
+  createdBy: ObjectId -> User,
+  timestamps: true
 }
 ```
 
 #### Ward Schema
 
-```javascript
+```text
 {
   name: String (unique),
   type: Enum ['General', 'ICU', 'Emergency', 'maternity', 'Pediatric'],
@@ -144,37 +146,48 @@ Methods:
   beds: [{
     number: String,
     isOccupied: Boolean,
-    patient: ObjectId → Patient
+    patient: ObjectId -> Patient
   }],
-  timestamps: { createdAt, updatedAt }
+  timestamps: true
 }
 ```
 
 #### MedicalRecord Schema
 
-```javascript
+```text
 {
-  patient: ObjectId → Patient,
-  doctor: ObjectId → User,
+  patient: ObjectId -> Patient,
+  doctor: ObjectId -> User,
+  appointment: ObjectId -> Appointment (optional),
+  vitals: {
+    bloodPressure: String,
+    temperature: Number,
+    pulse: Number,
+    weight: Number
+  },
   diagnosis: String,
   treatment: String,
-  medications: [String],
+  prescriptions: [{
+    medicine: String,
+    dosage: String,
+    frequency: String,
+    duration: String
+  }],
   notes: String,
-  visitDate: Date,
-  timestamps: { createdAt, updatedAt }
+  timestamps: true
 }
 ```
 
 #### AuditLog Schema
 
-```javascript
+```text
 {
-  user: ObjectId → User,   // Who performed the action
-  action: String,          // e.g., 'PATIENT_ADMISSION'
-  details: String,         // Human-readable description
-  resourceId: ObjectId,    // ID of the affected resource (optional)
-  ip: String,              // IP address of the requester
-  timestamps: { createdAt }
+  user: ObjectId -> User,
+  action: String,
+  details: String,
+  resourceId: ObjectId (optional),
+  ip: String,
+  createdAt: Date
 }
 ```
 
@@ -224,7 +237,7 @@ export const getPatients = asyncHandler(async (req, res) => {
 
 Global error handler formats responses:
 
-```javascript
+```text
 {
   success: false,
   message: "Error message",
@@ -673,9 +686,7 @@ Access URLs:
 ```json
 {
 	"success": true,
-	"data": {
-		/* resource data */
-	},
+	"data": {},
 	"message": "Operation successful"
 }
 ```
@@ -686,9 +697,7 @@ Access URLs:
 {
 	"success": false,
 	"message": "Error description",
-	"errors": [
-		/* validation errors */
-	]
+	"errors": []
 }
 ```
 
@@ -697,9 +706,7 @@ Access URLs:
 ```json
 {
 	"success": true,
-	"data": [
-		/* items */
-	],
+	"data": [],
 	"pagination": {
 		"page": 1,
 		"limit": 10,
