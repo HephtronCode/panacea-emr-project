@@ -37,12 +37,35 @@ pnpm dev
 pnpm start
 ```
 
+### API Docs (Swagger)
+
+- Swagger UI: http://localhost:5000/api-docs
+- Configuration: [src/config/swagger.js](src/config/swagger.js)
+
 From the repository root you can also run both API and UI concurrently:
 
 ```bash
 pnpm run dev        # starts API (5000) + UI (5173)
 pnpm run backend    # API only
 pnpm run frontend   # UI only
+```
+
+### Tests
+
+```bash
+# Run backend tests (Jest + Supertest)
+pnpm test
+```
+
+Test setup lives under [test/setup.js](test/setup.js) and example specs under [test/auth.test.js](test/auth.test.js).
+
+### Docker Compose
+
+- Use root-level `docker-compose.yml` to run API + UI together:
+
+```bash
+docker compose up --build
+docker compose down
 ```
 
 ### API Base
@@ -60,3 +83,4 @@ pnpm run frontend   # UI only
 - App configuration: `src/app.js`
 - Database connection: `src/config/db.js`
 - Routes/controllers/models under `src/`
+ - API documentation: `src/config/swagger.js` (served at `/api-docs`)

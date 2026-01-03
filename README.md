@@ -57,6 +57,7 @@ pnpm run frontend  # starts UI  (port 5173)
 
 | Feature                 | Description                                                     |
 | ----------------------- | --------------------------------------------------------------- |
+| **Landing Page**        | Modern public-facing introduction to the Panacea platform      |
 | **Authentication**      | Role-based access (Admin, Doctor, Nurse, Receptionist, Patient) |
 | **Patient Registry**    | Complete patient profiles with medical history tracking         |
 | **Appointments**        | Schedule, manage, and track appointment statuses                |
@@ -87,11 +88,34 @@ panacea-project/
         ├── pages/            # Route components
         ├── components/       # UI components (shadcn/ui & custom)
         ├── api/              # Axios API client modules
+
+### Run with Docker (Production-like)
+
+```bash
+# From the repository root
+# 1) Create a .env file supplying secrets for compose
+echo JWT_SECRET=your_strong_secret_here > .env
+echo JWT_EXPIRE=30d >> .env
+
+# 2) Build and start both API and UI containers
+docker compose up --build
+
+# 3) Stop containers
+docker compose down
+```
+
+Access via Docker:
+- UI: http://localhost:3000
+- API: http://localhost:5000/api
+- API Docs: http://localhost:5000/api-docs
         ├── context/          # Auth & Global state
         ├── layouts/          # Dashboard shells
         ├── lib/              # Utility functions
         └── dev/              # Developer tools & previews
-```
+
+**Dev Tooling:**
+- **pnpm workbench** with root scripts (`install-all`, `dev`, `backend`, `frontend`)
+- **Concurrently** for parallel API/UI dev servers
 
 ## 🔌 API Endpoints
 
@@ -103,27 +127,35 @@ Base URL: `http://localhost:5000/api`
 | | POST | `/auth/register` | New user registration (Staff) |
 | **Patients** | GET | `/patients` | List all patients |
 | | POST | `/patients` | Register new patient |
+
+**Docker Compose (`.env` at repo root):**
+```env
+JWT_SECRET=your_strong_secret_here
+JWT_EXPIRE=30d
+```
 | | GET | `/patients/:id` | Patient details |
 | | PUT | `/patients/:id` | Update patient |
 | | DELETE | `/patients/:id` | Remove patient |
 | **Appointments** | GET | `/appointments` | List appointments |
 | | POST | `/appointments` | Create appointment |
+
+### Swagger API Docs
+
+- When the backend is running, Swagger UI is served at: http://localhost:5000/api-docs
+- The Swagger spec is generated via `src/config/swagger.js`.
 | | PUT | `/appointments/:id` | Update status/date |
 | **Records** | GET | `/records/all` | List all records (Staff) |
 | | POST | `/records` | Create record |
-| | GET | `/records/:patientId`| Patient history |
+- **Soft Deletes:** Critical entities (e.g., `Patient`) use `isDeleted` with transparent filtering.
+- **Standard Responses:** All controllers return a consistent shape via `utils/apiResponse.js`.
 | **Wards** | GET | `/wards` | Ward list with occupancy |
 | | POST | `/wards` | Create ward |
 | | PUT | `/wards/:id` | Update ward/beds |
-| | DELETE | `/wards/:id` | Remove ward |
-| **Analytics** | GET | `/analytics` | Dashboard metrics |
-| **System** | GET | `/health` | API health check |
-
+  
 ## 🔐 Environment Variables
 
 **Backend (`panacea-backend/.env`):**
 ```env
-PORT=5000
 NODE_ENV=development
 MONGO_URI=mongodb://localhost:27017/panacea
 JWT_SECRET=your_secret_key_here

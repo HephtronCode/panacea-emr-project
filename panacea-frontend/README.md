@@ -32,6 +32,17 @@ pnpm dev
 pnpm run dev
 ```
 
+### Docker (Production-like)
+
+The root `docker-compose.yml` builds and serves the UI via Nginx:
+
+```bash
+docker compose up --build
+docker compose down
+```
+
+Access UI at http://localhost:3000. API is expected at http://localhost:5000/api.
+
 ### Build & Preview
 
 ```bash
@@ -43,3 +54,4 @@ pnpm preview
 
 - Axios base URL is taken from `VITE_API_URL` (defaults to `http://localhost:5000/api`).
 - Uses shadcn/ui, Tailwind CSS v4, React Router, and TanStack Query.
+ - Auth state managed via `src/context/AuthContext.jsx` with JWT stored in localStorage.

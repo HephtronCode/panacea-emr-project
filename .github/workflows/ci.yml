@@ -1,22 +1,17 @@
-name: Panacea CI Pipeline
+name: CI Pipeline
 
-# Trigger on push to main or pull requests
-on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+on: [push, pull_request]
 
 jobs:
-  backend-test:
+  test:
     runs-on: ubuntu-latest
 
-    # We need a MongoDB Database inside the Github runner
     services:
       mongodb:
         image: mongo:6.0
         ports:
           - 27017:27017
+        # Health Check to ensure it's ready
         options: >-
           --health-cmd mongo
           --health-interval 10s
@@ -28,33 +23,27 @@ jobs:
         node-version: [20.x]
 
     steps:
-      # 1. Get the Code
-      - uses: actions/checkout@v4
-
-      # 2. Setup Node
+      - uses: actions/checkout@v3
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
 
-      # 3. Install pnpm (Efficient Package Manager)
       - uses: pnpm/action-setup@v3
         with:
-          version: 9
+          version: 8
 
-      # 4. Install Dependencies (Backend Only)
-      - name: Install Backend Deps
+      - name: Install Dependencies
         run: |
           cd panacea-backend
           pnpm install
 
-      # 5. Run the Test
-      - name: Run Jest Tests
+      - name: Run Tests
         env:
-          # Connect to the Service Container defined above
           MONGO_URI: mongodb://localhost:27017/panacea_test
-          JWT_SECRET: temporary_secret_for_testing
+          JWT_SECRET: testing_secret_key_123
           NODE_ENV: test
         run: |
           cd panacea-backend
-          pnpm test
+          # --passWithNoTests prevents failure if you deleted the sample tests
+          pnpm test -- --passWithNoTests

@@ -15,3 +15,8 @@ export const fetchPatientRecords = async (patientId) => {
 	const { data } = await api.get(`/records/${patientId}`);
 	return data.data;
 };
+
+export const deleteRecord = async (id) => {
+	const response = await api.delete(`/records/${id}`);
+	return response.data;
+};

@@ -99,6 +99,7 @@ panacea-backend/
 ```
 
 Methods:
+
 - `generateAuthToken()` → Returns signed JWT
 - `matchPassword(plaintext)` → Compares bcrypt hashes
 
@@ -245,6 +246,62 @@ Global error handler formats responses:
 }
 ```
 
+## Cross-Cutting Concerns
+
+### Soft Delete Strategy (Patients)
+
+- Patients use `isDeleted: true` and `deletedAt` timestamps to avoid hard deletes.
+- Query middleware ensures soft-deleted patients are excluded by default.
+
+Example filter (conceptual):
+
+```javascript
+// In Patient model middleware
+Patient.pre(["find", "findOne"], function (next) {
+	this.where({ isDeleted: { $ne: true } });
+	next();
+});
+```
+
+### Standardized API Responses
+
+All controllers send a consistent envelope via `utils/apiResponse.js`:
+
+```javascript
+// apiResponse.js
+export const ok = (res, data, message = "OK") =>
+	res.status(200).json({ success: true, data, message });
+
+export const created = (res, data, message = "Created") =>
+	res.status(201).json({ success: true, data, message });
+
+export const fail = (res, message = "Bad Request", status = 400, errors = []) =>
+	res.status(status).json({ success: false, message, errors });
+```
+
+### Validation Pipeline
+
+Request validation uses `express-validator` bound through `middleware/validatorMiddleware.js`:
+
+```javascript
+// Example usage in routes
+import { body } from "express-validator";
+import { runValidations } from "../middleware/validatorMiddleware.js";
+
+router.post(
+	"/patients",
+	[body("name").isString().notEmpty(), body("phone").matches(/^\d{10}$/)],
+	runValidations,
+	patientController.createPatient
+);
+```
+
+### API Documentation (Swagger)
+
+- Swagger is configured via `src/config/swagger.js` and served at `/api-docs`.
+- Specs are generated from JSDoc-style comments and manual definitions.
+- Useful for onboarding and client contract validation.
+
 ---
 
 ## Frontend Architecture
@@ -342,12 +399,21 @@ export const getPatient = (id) => api.get(`/patients/${id}`);
 export const createPatient = (data) => api.post("/patients", data);
 export const updatePatient = (id, data) => api.put(`/patients/${id}`, data);
 export const deletePatient = (id) => api.delete(`/patients/${id}`);
+
+// appointments.js
+export const updateAppointment = (id, data) =>
+	api.put(`/appointments/${id}`, data);
+export const deleteAppointment = (id) => api.delete(`/appointments/${id}`);
+
+// records.js
+export const deleteRecord = (id) => api.delete(`/records/${id}`);
 ```
 
 ### Routing Architecture
 
 **Public Routes:**
 
+- `/` - Landing Page
 - `/login` - Authentication page
 
 **Protected Routes (Dashboard Layout):**
@@ -519,6 +585,20 @@ E2E Tests (Playwright/Cypress)
 ├── Patient registration
 └── Appointment scheduling
 ```
+
+### CI/CD Pipeline
+
+The project uses GitHub Actions for Continuous Integration.
+
+**Workflow Configuration (`.github/workflows/ci.yml`):**
+
+- **Trigger:** Pushes and Pull Requests to any branch.
+- **Environment:** Node.js 20.x, MongoDB 6.0 (Service Container).
+- **Steps:**
+  1. Checkout code.
+  2. Setup Node.js.
+  3. Install dependencies via `pnpm` (v8).
+  4. Run backend tests with Jest.
 
 ---
 
@@ -758,5 +838,5 @@ test: Add user authentication tests
 
 ---
 
-**Last Updated:** December 2025  
-**Maintained By:** Development Team
+**Last Updated:** January 3, 2026  
+**Maintained By:** Babatunde Abubakar

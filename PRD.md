@@ -2,7 +2,7 @@
 
 ## Panacea Hospital Management System
 
-**Version:** 1.1  
+**Version:** 1.3  
 **Last Updated:** January 3, 2026  
 **Status:** Active Development
 
@@ -186,6 +186,7 @@ GET    /api/patients/search?q=query
 - [x] Create appointments with date, time, doctor, patient
 - [x] View appointments by date, doctor, or patient
 - [x] Update appointment status (Pending, Completed, Cancelled, No-Show)
+- [x] Delete/Reschedule appointments
 - [x] Add appointment notes
 - [ ] Prevent double-booking of doctors
 - [ ] Send appointment reminders (email/SMS)
@@ -229,6 +230,7 @@ GET    /api/appointments/patient/:patientId
 
 - [x] Create medical records linked to patient and doctor
 - [x] Record diagnosis, treatment plan, and medications
+- [x] Delete medical records (Staff only)
 - [x] Add visit notes with timestamps
 - [x] View patient's medical history chronologically
 - [ ] Search records by diagnosis or medication
@@ -698,6 +700,7 @@ GET /api/analytics/patients
 
 **Must Have (MVP):**
 
+- [x] Landing Page at root `/`
 - [x] Authentication with role-based access
 - [x] Patient registry with CRUD operations
 - [x] Appointment scheduling with calendar view
@@ -847,6 +850,8 @@ GET /api/analytics/patients
 | ------- | ------------ | -------- | -------------------- |
 | 1.0     | Dec 29, 2025 | Dev Team | Initial PRD creation |
 | 1.1     | Jan 3, 2026  | Dev Team | Updated status & implementation details |
+| 1.2     | Jan 3, 2026  | Dev Team | Added Landing Page and API expansion |
+| 1.3     | Jan 3, 2026  | Dev Team | Updated docs (Docker, Swagger, soft deletes, standardized responses) |
 
 ### 13.4 Developer Workflow (Local)
 
@@ -887,6 +892,4 @@ Access URLs:
 
 ---
 
-**Document Owner:** Product Manager  
-**Stakeholders:** Development Team, Hospital Administrators, Clinical Staff  
-**Next Review:** March 31, 2026
+**Document Owner:** Babatunde Abubakar
