@@ -700,7 +700,7 @@ GET /api/analytics/patients
 
 **Must Have (MVP):**
 
-- [x] Landing Page at root `/`
+- [ ] F0: Landing Page at root `/`
 - [x] Authentication with role-based access
 - [x] Patient registry with CRUD operations
 - [x] Appointment scheduling with calendar view
@@ -846,11 +846,11 @@ GET /api/analytics/patients
 
 ### 13.3 Change Log
 
-| Version | Date         | Author   | Changes              |
-| ------- | ------------ | -------- | -------------------- |
-| 1.0     | Dec 29, 2025 | Dev Team | Initial PRD creation |
-| 1.1     | Jan 3, 2026  | Dev Team | Updated status & implementation details |
-| 1.2     | Jan 3, 2026  | Dev Team | Added Landing Page and API expansion |
+| Version | Date         | Author   | Changes                                                              |
+| ------- | ------------ | -------- | -------------------------------------------------------------------- |
+| 1.0     | Dec 29, 2025 | Dev Team | Initial PRD creation                                                 |
+| 1.1     | Jan 3, 2026  | Dev Team | Updated status & implementation details                              |
+| 1.2     | Jan 3, 2026  | Dev Team | Added Landing Page and API expansion                                 |
 | 1.3     | Jan 3, 2026  | Dev Team | Updated docs (Docker, Swagger, soft deletes, standardized responses) |
 
 ### 13.4 Developer Workflow (Local)

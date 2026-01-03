@@ -586,6 +586,11 @@ E2E Tests (Playwright/Cypress)
 └── Appointment scheduling
 ```
 
+Execution:
+
+- Frontend tests are currently executed locally; CI runs backend tests only.
+- When a frontend test suite and CI scripts are added, integrate Vitest and E2E into the workflow.
+
 ### CI/CD Pipeline
 
 The project uses GitHub Actions for Continuous Integration.
@@ -598,7 +603,12 @@ The project uses GitHub Actions for Continuous Integration.
   1. Checkout code.
   2. Setup Node.js.
   3. Install dependencies via `pnpm` (v8).
-  4. Run backend tests with Jest.
+  4. Run backend tests with Jest (API only).
+
+**Note on Frontend Tests:**
+
+- Frontend tests (Vitest) are currently executed locally and are not part of CI.
+- CI coverage focuses on backend stability; extend the workflow to include frontend tests once a test suite and scripts are added to `panacea-frontend`.
 
 ---
 
