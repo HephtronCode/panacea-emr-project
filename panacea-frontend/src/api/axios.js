@@ -19,36 +19,27 @@ api.interceptors.request.use(
 	(error) => Promise.reject(error)
 );
 
-// 2. Response Interceptor (The Smart Adapter)
+/// 2. Response Interceptor (The Smart Adapter)
 api.interceptors.response.use(
 	(response) => {
-		// Backend now returns: { success: true, message: "...", data: {...} }
-		// We generally just want the 'response' object to handle normally,
-		// or we can strictly return response.data if we trust the format.
 		return response;
 	},
 	(error) => {
-		// UNIFIED ERROR HANDLING
 		const originalRequest = error.config;
 
-		// Extract the simplified error message from our backend Standard Response
-		const backendMessage =
-			error.response?.data?.message ||
-			error.message ||
-			"An unexpected error occurred";
+		const backendMessage = error.response?.data?.message || error.message || "An unexpected error occurred";
 
-		// Log it for dev
-		console.error("API Error:", backendMessage);
+		// --- THE FIX IS HERE ---
+		// Don't auto-logout if we are TRYING to log in.
+		// We only auto-logout if it's a different request (like getting patients) that failed.
+		const isLoginRequest = originalRequest.url.includes('/auth/login');
 
-		// Optional: Detect 401 (Expired Token) and auto-logout
-		if (error.response?.status === 401 && !originalRequest._retry) {
+		if (error.response?.status === 401 && !originalRequest._retry && !isLoginRequest) {
 			sessionStorage.clear();
-			window.location.href = "/login";
+			window.location.href = '/login';
 			return Promise.reject(new Error("Session expired. Please login again."));
 		}
 
-		// Return a cleaner error object to the component
-		// Instead of error.response.data, we attach the message directly to the error object used in catch
 		const cleanError = new Error(backendMessage);
 		cleanError.status = error.response?.status;
 		return Promise.reject(cleanError);
