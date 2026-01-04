@@ -7,7 +7,11 @@ dotenv.config();
 export const connect = async () => {
     // This would forces a separate test database
     // Replaces the actual Db name in the connection string with "panacea_test"
-    const testURI = process.env.Mongo_URI.replace(/\/[^/?]+(\?|$)/, "/panacea_test$1");
+    const mongoUri = process.env.MONGO_URI || process.env.Mongo_URI;
+    if (!mongoUri) {
+        throw new Error("MONGO_URI environment variable is not defined");
+    }
+    const testURI = mongoUri.replace(/\/[^/?]+(\?|$)/, "/panacea_test$1");
 
     // Check the state before connecting (0 = disconnected)
     if (mongoose.connection.readyState === 0) {
