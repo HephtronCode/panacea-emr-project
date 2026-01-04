@@ -13,7 +13,7 @@ jobs:
           - 27017:27017
         # Health Check to ensure it's ready
         options: >-
-          --health-cmd mongo
+          --health-cmd mongosh
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
@@ -31,7 +31,7 @@ jobs:
 
       - uses: pnpm/action-setup@v3
         with:
-          version: 8
+          version: 10
 
       - name: Install Dependencies
         run: |
