@@ -1,6 +1,7 @@
 import app from "./src/app.js";
 import dotenv from "dotenv";
 import connectDB from "./src/config/db.js";
+import { startKeepAlive } from "./src/services/cronService.js";
 
 // Load the env var
 dotenv.config();
@@ -38,4 +39,7 @@ connectDB();
 app.listen(PORT, () => {
 	console.log(`Server running on port: ${PORT}`);
 	console.log(`Environment: ${process.env.NODE_ENV}`);
+
+	// Start the keep-alive cron job
+	startKeepAlive();
 });
