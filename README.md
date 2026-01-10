@@ -2,6 +2,10 @@
 
 A modern, full-stack hospital management platform built with React 19 and Node.js (Express 5) for streamlined patient care, appointment scheduling, and clinical operations.
 
+## 🔗 Live Demo
+
+- Deployed (Vercel): https://panacea-emr-project.vercel.app/
+
 ## 🚀 Quick Start
 
 ### Prerequisites
