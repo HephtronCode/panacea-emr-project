@@ -6,6 +6,11 @@ A modern, full-stack hospital management platform built with React 19 and Node.j
 
 - Deployed (Vercel): https://panacea-emr-project.vercel.app/
 
+## 🔑 Test Login
+
+- Username: yasmin@hospital.com
+- Password: password123
+
 ## 🚀 Quick Start
 
 ### Prerequisites
